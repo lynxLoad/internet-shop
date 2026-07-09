@@ -3,33 +3,28 @@ package org.skypro.skyshop.engine;
 import org.skypro.skyshop.Searchable;
 import org.skypro.skyshop.exception.BestResultNotFound;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class SearchEngine {
-    private final Searchable[] searchList;
-    private int count;
+    private final List<Searchable> searchList;
 
     public SearchEngine(int length) {
-        this.searchList = new Searchable[length];
-        this.count = 0;
+        this.searchList = new LinkedList<>();
     }
 
-    public Searchable[] search(String query) {
-        Searchable[] result = new Searchable[5];
-        int resultIndex = 0;
+    public List<Searchable> search(String query) {
+        List<Searchable> result = new LinkedList<>();
 
-        for (int i = 0; i < searchList.length; i++) {
-            if (searchList[i] == null) {
+        for (Searchable searchable : searchList) {
+            if (searchable == null) {
                 continue;
             }
 
-            String searchTerm = searchList[i].getSearchTerm();
+            String searchTerm = searchable.getSearchTerm();
 
             if (searchTerm.toLowerCase().contains(query.toLowerCase())) {
-                result[resultIndex] = searchList[i];
-                resultIndex++;
-
-                if (resultIndex >= result.length) {
-                    break;
-                }
+                result.add(searchable);
             }
         }
         return result;
@@ -57,17 +52,17 @@ public class SearchEngine {
         Searchable result = null;
         int maxMatches = -1;
 
-        for (int i = 0; i < searchList.length; i++) {
-            if (searchList[i] == null) {
+        for (Searchable searchable : searchList) {
+            if (searchable == null) {
                 continue;
             }
 
-            String searchTerm = searchList[i].getSearchTerm();
+            String searchTerm = searchable.getSearchTerm();
             int matches = countMatchesInString(searchTerm.toLowerCase(), query.toLowerCase());
 
             if (matches > maxMatches) {
                 maxMatches = matches;
-                result = searchList[i];
+                result = searchable;
             }
         }
 
@@ -79,11 +74,6 @@ public class SearchEngine {
     }
 
     public void add(Searchable searchable) {
-        if (count < searchList.length) {
-            searchList[count] = searchable;
-            count++;
-        } else {
-            System.out.println("Невозможно добавить в поисковой запрос");
-        }
+        searchList.add(searchable);
     }
 }
