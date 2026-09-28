@@ -10,13 +10,14 @@ import org.skypro.skyshop.article.Article;
 import org.skypro.skyshop.engine.SearchEngine;
 
 import java.util.List;
+import java.util.Map;
 
 public class App {
     public static void main(String[] args) throws BestResultNotFound {
         Product apple = new SimpleProduct("Яблоко", 50);
         Product bread = new SimpleProduct("Хлеб", 35);
-        Product milk = new DiscountedProduct("Молоко", 80, 15);  // скидка 15%
-        Product cheese = new DiscountedProduct("Сыр", 120, 10);   // скидка 10%
+        Product milk = new DiscountedProduct("Молоко", 80, 15);
+        Product cheese = new DiscountedProduct("Сыр", 120, 10);
         Product juice = new FixPriceProduct("Сок");
 
         ProductBasket basket = new ProductBasket();
@@ -86,22 +87,22 @@ public class App {
         System.out.println("Добавлена статья: " + article3.getName());
 
         System.out.println("\n=== Поиск ===");
-        List<Searchable> results1 = searchEngine.search("яблоко");
+        Map<String, Searchable> results1 = searchEngine.search("яблоко");
         printSearchResults(results1);
 
-        List<Searchable> results2 = searchEngine.search("молоко");
+        Map<String, Searchable> results2 = searchEngine.search("молоко");
         printSearchResults(results2);
 
-        List<Searchable> results3 = searchEngine.search("сок");
+        Map<String, Searchable> results3 = searchEngine.search("сок");
         printSearchResults(results3);
 
-        List<Searchable> results4 = searchEngine.search("хлеб");
+        Map<String, Searchable> results4 = searchEngine.search("хлеб");
         printSearchResults(results4);
 
-        List<Searchable> results5 = searchEngine.search("шоколад");
+        Map<String, Searchable> results5 = searchEngine.search("шоколад");
         printSearchResults(results5);
 
-        List<Searchable> results6 = searchEngine.search("как");
+        Map<String, Searchable> results6 = searchEngine.search("как");
         printSearchResults(results6);
 
         System.out.println("\n=== Создание некорректных товаров ===");
@@ -170,18 +171,15 @@ public class App {
         if (removedProducts2.isEmpty()) System.out.println("Список пуст");
     }
 
-    private static void printSearchResults(List<Searchable> results) {
-        int foundCount = 0;
-        for (Searchable item : results) {
-            if (item != null) {
-                foundCount++;
-                System.out.println("Найдено: " + item.getStringRepresentation());
-            }
-        }
-        if (foundCount == 0) {
+    private static void printSearchResults(Map<String, Searchable> results) {
+        if (results.isEmpty()) {
             System.out.println("Ничего не найдено.");
-        } else {
-            System.out.println("Всего найдено: " + foundCount);
+            return;
         }
+
+        for (Map.Entry<String, Searchable> entry : results.entrySet()) {
+            System.out.println("Найдено: " + entry.getValue().getStringRepresentation());
+        }
+        System.out.println("Всего найдено: " + results.size());
     }
 }
