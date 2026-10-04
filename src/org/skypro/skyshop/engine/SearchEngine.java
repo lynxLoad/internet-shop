@@ -3,20 +3,25 @@ package org.skypro.skyshop.engine;
 import org.skypro.skyshop.Searchable;
 import org.skypro.skyshop.exception.BestResultNotFound;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class SearchEngine {
-    private final List<Searchable> searchList;
+    private final Set<Searchable> searchList;
 
     public SearchEngine(int length) {
-        this.searchList = new LinkedList<>();
+        this.searchList = new HashSet<>(length);
     }
 
-    public Map<String, Searchable> search(String query) {
-        Map<String, Searchable> result = new TreeMap<>();
+    public Set<Searchable> search(String query) {
+        Comparator<Searchable> comparator = (a, b) -> {
+            int lengthCompare = Integer.compare(b.getNameLength(), a.getNameLength());
+            if (lengthCompare != 0) {
+                return lengthCompare;
+            }
+            return a.getName().compareTo(b.getName());
+        };
+
+        Set<Searchable> result = new TreeSet<>(comparator);
 
         for (Searchable searchable : searchList) {
             if (searchable == null) {
@@ -26,9 +31,10 @@ public class SearchEngine {
             String searchTerm = searchable.getSearchTerm();
 
             if (searchTerm.toLowerCase().contains(query.toLowerCase())) {
-                result.put(searchable.getName(), searchable);
+                result.add(searchable);
             }
         }
+
         return result;
     }
 

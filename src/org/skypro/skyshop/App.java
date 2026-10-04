@@ -10,7 +10,7 @@ import org.skypro.skyshop.article.Article;
 import org.skypro.skyshop.engine.SearchEngine;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 public class App {
     public static void main(String[] args) throws BestResultNotFound {
@@ -87,23 +87,72 @@ public class App {
         System.out.println("Добавлена статья: " + article3.getName());
 
         System.out.println("\n=== Поиск ===");
-        Map<String, Searchable> results1 = searchEngine.search("яблоко");
+        Set<Searchable> results1 = searchEngine.search("яблоко");
         printSearchResults(results1);
 
-        Map<String, Searchable> results2 = searchEngine.search("молоко");
+        Set<Searchable> results2 = searchEngine.search("молоко");
         printSearchResults(results2);
 
-        Map<String, Searchable> results3 = searchEngine.search("сок");
+        Set<Searchable> results3 = searchEngine.search("сок");
         printSearchResults(results3);
 
-        Map<String, Searchable> results4 = searchEngine.search("хлеб");
+        Set<Searchable> results4 = searchEngine.search("хлеб");
         printSearchResults(results4);
 
-        Map<String, Searchable> results5 = searchEngine.search("шоколад");
+        Set<Searchable> results5 = searchEngine.search("шоколад");
         printSearchResults(results5);
 
-        Map<String, Searchable> results6 = searchEngine.search("как");
+        Set<Searchable> results6 = searchEngine.search("как");
         printSearchResults(results6);
+
+        System.out.println("\n=== Проверка сортировки при одинаковой длине имён ===");
+        SearchEngine sameLengthEngine = new SearchEngine(10);
+
+        Article bobr = new Article("Бобр", "Статья о бобрах");
+        Article krot = new Article("Крот", "Статья о кротах");
+        sameLengthEngine.add(bobr);
+        sameLengthEngine.add(krot);
+
+        Set<Searchable> sameLenResults = sameLengthEngine.search("о");
+        printSearchResults(sameLenResults);
+        System.out.println("Ожидается: Бобр → Крот (длины равны, натуральный порядок)");
+
+        System.out.println("\n=== Проверка: длинное имя строго раньше короткого ===");
+        SearchEngine lengthEngine = new SearchEngine(10);
+        lengthEngine.add(new Article("А", "односимвольное имя"));
+        lengthEngine.add(new Article("АААААААААА", "десять символов"));
+        lengthEngine.add(new Article("ААААА", "пять символов"));
+
+        Set<Searchable> lengthResults = lengthEngine.search("а");
+        printSearchResults(lengthResults);
+        System.out.println("Ожидается: 10 → 5 → 1 символ");
+
+        System.out.println("\n=== Проверка отсутствия дубликатов в поисковом движке ===");
+        SearchEngine dupEngine = new SearchEngine(10);
+
+        Product apple1 = new SimpleProduct("Яблоко", 50);
+        Product apple2 = new SimpleProduct("Яблоко", 999);
+        Product apple3 = new DiscountedProduct("Яблоко", 100, 20);
+
+        dupEngine.add(apple1);
+        dupEngine.add(apple2);
+        dupEngine.add(apple3);
+
+        Set<Searchable> dupResults = dupEngine.search("яблоко");
+        printSearchResults(dupResults);
+        System.out.println("Ожидается: ровно 1 элемент (дубликаты по name отброшены)");
+
+        System.out.println("\n=== Проверка дубликатов статей с одинаковым именем ===");
+        SearchEngine dupArticleEngine = new SearchEngine(10);
+
+        Article art1 = new Article("Java", "Текст 1");
+        Article art2 = new Article("Java", "Совсем другой текст");
+        dupArticleEngine.add(art1);
+        dupArticleEngine.add(art2);
+
+        Set<Searchable> dupArtResults = dupArticleEngine.search("java");
+        printSearchResults(dupArtResults);
+        System.out.println("Ожидается: ровно 1 элемент (у статей одинаковое name)");
 
         System.out.println("\n=== Создание некорректных товаров ===");
         try {
@@ -171,14 +220,14 @@ public class App {
         if (removedProducts2.isEmpty()) System.out.println("Список пуст");
     }
 
-    private static void printSearchResults(Map<String, Searchable> results) {
+    private static void printSearchResults(Set<Searchable> results) {
         if (results.isEmpty()) {
             System.out.println("Ничего не найдено.");
             return;
         }
 
-        for (Map.Entry<String, Searchable> entry : results.entrySet()) {
-            System.out.println("Найдено: " + entry.getValue().getStringRepresentation());
+        for (Searchable searchable : results) {
+            System.out.println("Найдено: " + searchable.getStringRepresentation());
         }
         System.out.println("Всего найдено: " + results.size());
     }
